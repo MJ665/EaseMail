@@ -73,7 +73,7 @@ export default function Dashboard() {
             <Logo className="h-16 w-16" />
         </div>
         <h2 className="text-3xl font-bold text-slate-800">Welcome to EaseMail!</h2>
-        <p className="mt-4 text-lg text-slate-600">Let's get you ready to send your first batch of emails. Please complete the steps below.</p>
+        <p className="mt-4 text-lg text-slate-600">Lets get you ready to send your first batch of emails. Please complete the steps below.</p>
         <div className="w-full max-w-sm mx-auto my-6 border-t border-gray-300"></div>
         <div className="grid grid-cols-1 gap-8 mt-8 md:grid-cols-2">
             <div className="p-6 border-2 border-dashed border-gray-300 rounded-lg">

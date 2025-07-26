@@ -53,7 +53,7 @@ export default function CSVUploader({ onUploadSuccess, className = '' }: { onUpl
       <h2 className="text-xl font-semibold">Upload Contacts CSV</h2>
       <p className="mt-2 text-sm text-gray-600">
         Get started by uploading a CSV of your contacts. You can use this{' '}
-        <a href="#" className="text-indigo-600 hover:underline">
+        <a href="https://docs.google.com/spreadsheets/d/1TZbPaKJ6mb5WhfTjYg-1gCzTRoZg4yo5OeJKGvAAvdo/edit?usp=sharing" className="text-indigo-600 hover:underline">
           template sheet
         </a>
         .
