@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/authOptions';
 import { createEmailGenerationPrompt } from '@/lib/gemini-prompt'; // This function is now updated
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY_ANALYZER!);
