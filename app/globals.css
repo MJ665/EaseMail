@@ -1,3 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+/* Custom component styles for a consistent, clean look */
+@layer components {
+  .card {
+    @apply bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-white/20;
+  }
+}
+
+
+
+
+
+
+
+
 @import "tailwindcss";
 
 :root {
@@ -22,5 +42,9 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+  font-family: 'Times New Roman', Times, serif;
+background: #2A7B9B;
+  background: linear-gradient(90deg, rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 72%, rgba(237, 221, 83, 1) 100%);
+  background-attachment: fixed; /* Makes the gradient stay in place on scroll */
+
+} 

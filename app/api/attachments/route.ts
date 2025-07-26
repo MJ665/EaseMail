@@ -2,23 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { PrismaClient } from '@prisma/client';
-import { IncomingForm } from 'formidable';
-import fs from 'fs';
+import { writeFile } from 'fs/promises';
 import path from 'path';
+import { mkdirSync } from 'fs';
 
 const prisma = new PrismaClient();
+const uploadDir = path.join(process.cwd(), 'public/uploads');
 
-// Disable the default body parser for this route
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
-const uploadDir = path.join(process.cwd(), '/public/uploads');
-
-// Ensure upload directory exists
-fs.mkdirSync(uploadDir, { recursive: true });
+// Ensure the upload directory exists synchronously on startup
+try {
+  mkdirSync(uploadDir, { recursive: true });
+} catch (error) {
+  console.error("Could not create upload directory:", error);
+}
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -32,41 +28,42 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const data: { fields: any; files: any } = await new Promise((resolve, reject) => {
-      const form = new IncomingForm({
-        uploadDir,
-        keepExtensions: true,
-        filename: (name, ext, part) => {
-          return `${user.id}-${Date.now()}-${part.originalFilename}`;
-        }
-      });
-      form.parse(req as any, (err, fields, files) => {
-        if (err) return reject(err);
-        resolve({ fields, files });
-      });
-    });
-    
-    const file = data.files.file[0];
+    const formData = await req.formData();
+    const file = formData.get('file') as File | null;
+
     if (!file) {
-      return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
+      return NextResponse.json({ error: 'No file uploaded.' }, { status: 400 });
     }
 
+    // Create a buffer from the file
+    const buffer = Buffer.from(await file.arrayBuffer());
+    
+    // Create a unique filename to prevent overwrites
+    const uniqueFilename = `${user.id}-${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
+    const filePath = path.join(uploadDir, uniqueFilename);
+
+    // Write the file to the filesystem
+    await writeFile(filePath, buffer);
+
+    // Save the attachment record to the database
     const newAttachment = await prisma.attachment.create({
       data: {
         userId: user.id,
-        fileName: file.originalFilename,
-        fileType: file.mimetype,
-        filePath: `/uploads/${file.newFilename}`,
+        fileName: file.name,
+        fileType: file.type,
+        // Store the public path for client-side access
+        filePath: `/uploads/${uniqueFilename}`, 
       },
     });
 
     return NextResponse.json(newAttachment, { status: 201 });
   } catch (error) {
     console.error('File upload error:', error);
-    return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to upload file.', details: (error as Error).message }, { status: 500 });
   }
 }
 
+// The GET function remains the same and is correct.
 export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session || !session.user?.email) {
@@ -77,4 +74,4 @@ export async function GET(req: NextRequest) {
   
     const attachments = await prisma.attachment.findMany({ where: { userId: user.id } });
     return NextResponse.json(attachments);
-  }
+}

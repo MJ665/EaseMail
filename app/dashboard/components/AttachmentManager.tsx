@@ -1,13 +1,10 @@
 'use client';
 import { useState, useEffect } from 'react';
 
-type Attachment = {
-  id: string;
-  fileName: string;
-  filePath: string;
-};
+type Attachment = { id: string; fileName: string; filePath: string };
 
-export default function AttachmentManager() {
+// Accept className as a prop
+export default function AttachmentManager({ onUploadSuccess, className = '' }: { onUploadSuccess: () => void, className?: string }) {
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -37,36 +34,39 @@ export default function AttachmentManager() {
     });
 
     if (response.ok) {
-      fetchAttachments();
-      setFile(null);
+      await fetchAttachments(); // Re-fetch to update the list
+      onUploadSuccess(); // Notify the parent component
+      setFile(null); // Clear the file input
     } else {
-      alert('Upload failed');
+      alert('Upload failed. Please try again.');
     }
     setIsUploading(false);
   };
 
   return (
-    <div className="p-6 my-6 bg-white rounded-lg shadow">
-      <h2 className="text-xl font-semibold">My Attachments</h2>
-      <div className="mt-4 space-y-2">
+    <div className={className}>
+      <h2 className="text-xl font-semibold text-slate-800">My Attachments</h2>
+      <p className="mt-1 text-sm text-gray-500">Upload your Resume, CV, Transcript, etc.</p>
+      <div className="mt-4 space-y-3">
         <input type="file" onChange={handleFileChange} className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"/>
         <button
           onClick={handleUpload}
           disabled={!file || isUploading}
-          className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:bg-gray-400"
+          className="w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:bg-gray-400"
         >
           {isUploading ? 'Uploading...' : 'Upload File'}
         </button>
       </div>
-      <ul className="mt-4 space-y-2">
-        {attachments.map((att) => (
+      <h3 className="mt-6 text-lg font-medium">Uploaded Files</h3>
+      <ul className="mt-2 space-y-2 h-32 overflow-y-auto">
+        {attachments.length > 0 ? attachments.map((att) => (
           <li key={att.id} className="flex items-center justify-between p-2 bg-gray-100 rounded">
-            <span>{att.fileName}</span>
+            <span className="text-sm truncate">{att.fileName}</span>
             <a href={att.filePath} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-500 hover:underline">
               View
             </a>
           </li>
-        ))}
+        )) : <p className="text-sm text-gray-400">No files uploaded yet.</p>}
       </ul>
     </div>
   );

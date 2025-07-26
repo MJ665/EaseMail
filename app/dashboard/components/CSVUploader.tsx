@@ -1,8 +1,8 @@
 'use client';
-
 import { useState } from 'react';
 
-export default function CSVUploader({ onUploadSuccess }: { onUploadSuccess: () => void }) {
+// Accept className as a prop
+export default function CSVUploader({ onUploadSuccess, className = '' }: { onUploadSuccess: () => void, className?: string }) {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [message, setMessage] = useState('');
